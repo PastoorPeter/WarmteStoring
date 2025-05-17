@@ -11,7 +11,7 @@ export function Header() {
               <path d="M19.79 14.93a8 8 0 0 0-1-9.25 8 8 0 0 0-12.58 0 8 8 0 0 0-1 9.25l6.29 10.32 6.29-10.32Z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
-            <h1 className="text-lg sm:text-xl font-bold text-secondary">Warmtestoringen Zoeker</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-secondary">Warmtestoring.nl</h1>
           </div>
           <div className="hidden sm:flex space-x-4">
             <HelpDialog />
