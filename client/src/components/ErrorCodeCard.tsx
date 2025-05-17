@@ -89,16 +89,12 @@ export function ErrorCodeCard({ errorCode, userType }: ErrorCodeCardProps) {
 
           <div className="mb-4">
             <h4 className="font-medium text-secondary mb-2">
-              {userType === "resident" ? "Oplossing voor bewoners" : "Oplossing voor monteurs"}
+              Oplossing
             </h4>
             <ol className="list-decimal list-inside space-y-2 text-foreground">
-              {userType === "resident"
-                ? formatSolution(errorCode.solutionForResidents).map((step, index) => (
-                    <li key={index}>{step.replace(/^\d+\.\s*/, '')}</li>
-                  ))
-                : formatSolution(errorCode.solutionForTechnicians || "").map((step, index) => (
-                    <li key={index}>{step.replace(/^\d+\.\s*/, '')}</li>
-                  ))}
+              {formatSolution(errorCode.solution).map((step, index) => (
+                <li key={index}>{step.replace(/^\d+\.\s*/, '')}</li>
+              ))}
             </ol>
           </div>
 

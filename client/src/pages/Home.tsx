@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { UserTypeSelector } from "@/components/UserTypeSelector";
 import { SearchBar } from "@/components/SearchBar";
 import { QuickFilters } from "@/components/QuickFilters";
 import { SearchResults } from "@/components/SearchResults";
-import { TechnicianPanel } from "@/components/TechnicianPanel";
 import { Footer } from "@/components/Footer";
 import { useSearchErrorCodes } from "@/hooks/use-error-codes";
 import { UserType } from "@/lib/types";
 
 export default function Home() {
-  const [userType, setUserType] = useState<UserType>("resident");
+  const userType: UserType = "resident";
   const [searchQuery, setSearchQuery] = useState("");
   
   const { data: searchResults, isLoading } = useSearchErrorCodes(searchQuery);
@@ -22,7 +20,6 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <UserTypeSelector userType={userType} setUserType={setUserType} />
 
       <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <section className="mb-8">
@@ -44,22 +41,15 @@ export default function Home() {
           </div>
         </section>
 
-        {userType === "resident" ? (
-          <div className="max-w-3xl mx-auto space-y-4">
-            <SearchResults
-              isLoading={isLoading}
-              searchQuery={searchQuery}
-              searchResults={searchResults}
-              userType={userType}
-              resetSearch={resetSearch}
-            />
-          </div>
-        ) : (
-          <TechnicianPanel 
+        <div className="max-w-3xl mx-auto space-y-4">
+          <SearchResults
+            isLoading={isLoading}
             searchQuery={searchQuery}
+            searchResults={searchResults}
+            userType={userType}
             resetSearch={resetSearch}
           />
-        )}
+        </div>
       </main>
 
       <Footer />

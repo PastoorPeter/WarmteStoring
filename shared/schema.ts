@@ -14,8 +14,7 @@ export const errorCodes = pgTable("error_codes", {
   severity: text("severity").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  solutionForResidents: text("solution_for_residents").notNull(),
-  solutionForTechnicians: text("solution_for_technicians"),
+  solution: text("solution").notNull(),
   system: text("system").notNull(),
   tags: text("tags").array(),
 });

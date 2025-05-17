@@ -12,7 +12,7 @@ export type ErrorCode = {
   tags?: string[];
 };
 
-export type UserType = "resident" | "technician";
+export type UserType = "resident";
 
 export type SearchFilters = {
   system?: string;
