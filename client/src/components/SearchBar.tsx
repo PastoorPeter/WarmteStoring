@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type SearchBarProps = {
   searchQuery: string;
@@ -7,12 +8,20 @@ type SearchBarProps = {
 };
 
 export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
+  const [inputValue, setInputValue] = useState(searchQuery);
+
   const handleClearSearch = () => {
+    setInputValue("");
     setSearchQuery("");
   };
 
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setSearchQuery(inputValue);
+  };
+
   return (
-    <div className="relative">
+    <form onSubmit={handleSubmit} className="relative">
       <div className="flex items-center relative">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -29,12 +38,12 @@ export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         </svg>
         <Input
           type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           placeholder="Zoek op foutcode (bijv. F1, E45) of beschrijving..."
           className="w-full pl-10 pr-14 py-6 rounded-lg border focus:border-primary"
         />
-        {searchQuery && (
+        {inputValue && (
           <button
             type="button"
             onClick={handleClearSearch}
@@ -56,6 +65,14 @@ export function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
           </button>
         )}
       </div>
-    </div>
+      <div className="mt-3 flex justify-center">
+        <Button 
+          type="submit" 
+          className="bg-primary hover:bg-primary-dark text-white font-medium px-6"
+        >
+          Zoeken
+        </Button>
+      </div>
+    </form>
   );
 }
