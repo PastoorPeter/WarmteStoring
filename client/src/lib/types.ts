@@ -6,8 +6,7 @@ export type ErrorCode = {
   severity: ErrorCodeSeverity;
   title: string;
   description: string;
-  solutionForResidents: string;
-  solutionForTechnicians?: string;
+  solution: string;
   system: string;
   tags?: string[];
 };
