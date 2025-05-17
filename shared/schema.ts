@@ -43,6 +43,7 @@ export const systemEnum = z.enum([
   "Nefit",
   "Agpo Ferroli",
   "Vaillant",
+  "Atag",
   "Andere"
 ]);
 export type System = z.infer<typeof systemEnum>;

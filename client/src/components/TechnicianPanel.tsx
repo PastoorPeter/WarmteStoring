@@ -68,6 +68,7 @@ export function TechnicianPanel({ searchQuery, resetSearch }: TechnicianPanelPro
                 <SelectItem value="Nefit">Nefit</SelectItem>
                 <SelectItem value="Agpo Ferroli">Agpo Ferroli</SelectItem>
                 <SelectItem value="Vaillant">Vaillant</SelectItem>
+                <SelectItem value="Atag">Atag</SelectItem>
               </SelectContent>
             </Select>
           </div>
