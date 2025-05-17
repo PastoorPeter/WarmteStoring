@@ -119,82 +119,86 @@ export interface IStorage {
   searchErrorCodes(query: string, system?: string, severity?: string): Promise<ErrorCode[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private errorCodes: Map<number, ErrorCode>;
-  currentUserId: number;
-  currentErrorCodeId: number;
+import { db } from "./db";
+import { eq, like, or, and, desc, sql } from "drizzle-orm";
 
-  constructor() {
-    this.users = new Map();
-    this.errorCodes = new Map();
-    this.currentUserId = 1;
-    this.currentErrorCodeId = 1;
-    
-    // Initialize with error codes
-    this.initializeErrorCodes();
-  }
-
-  private initializeErrorCodes() {
-    initialErrorCodes.forEach(errorCode => {
-      const id = this.currentErrorCodeId++;
-      const newErrorCode: ErrorCode = { ...errorCode, id };
-      this.errorCodes.set(id, newErrorCode);
-    });
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getAllErrorCodes(): Promise<ErrorCode[]> {
-    return Array.from(this.errorCodes.values());
+    return db.select().from(errorCodes).orderBy(desc(errorCodes.id));
   }
 
   async getErrorCodeById(id: number): Promise<ErrorCode | undefined> {
-    return this.errorCodes.get(id);
+    const [errorCode] = await db.select().from(errorCodes).where(eq(errorCodes.id, id));
+    return errorCode;
   }
 
   async getErrorCodeByCode(code: string): Promise<ErrorCode | undefined> {
-    return Array.from(this.errorCodes.values()).find(
-      (errorCode) => errorCode.code.toLowerCase() === code.toLowerCase()
+    const [errorCode] = await db.select().from(errorCodes).where(
+      eq(sql`LOWER(${errorCodes.code})`, code.toLowerCase())
     );
+    return errorCode;
   }
 
   async searchErrorCodes(query: string, system?: string, severity?: string): Promise<ErrorCode[]> {
-    if (!query && !system && !severity) {
+    let conditions = [];
+    
+    if (query) {
+      conditions.push(
+        or(
+          like(sql`LOWER(${errorCodes.code})`, `%${query.toLowerCase()}%`),
+          like(sql`LOWER(${errorCodes.title})`, `%${query.toLowerCase()}%`),
+          like(sql`LOWER(${errorCodes.description})`, `%${query.toLowerCase()}%`)
+          // Note: tags are an array so we'll handle them differently in the future
+          // For now this basic search should work well
+        )
+      );
+    }
+    
+    if (system && system !== "all") {
+      conditions.push(like(sql`LOWER(${errorCodes.system})`, `%${system.toLowerCase()}%`));
+    }
+    
+    if (severity && severity !== "all") {
+      conditions.push(eq(errorCodes.severity, severity));
+    }
+    
+    if (conditions.length === 0) {
       return this.getAllErrorCodes();
     }
-
-    return Array.from(this.errorCodes.values()).filter(errorCode => {
-      const matchesQuery = !query || 
-        errorCode.code.toLowerCase().includes(query.toLowerCase()) ||
-        errorCode.title.toLowerCase().includes(query.toLowerCase()) ||
-        errorCode.description.toLowerCase().includes(query.toLowerCase()) ||
-        (errorCode.tags && errorCode.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())));
+    
+    const results = await db.select()
+      .from(errorCodes)
+      .where(and(...conditions))
+      .orderBy(desc(errorCodes.id));
       
-      const matchesSystem = !system || system === "all" || 
-        errorCode.system.toLowerCase().includes(system.toLowerCase());
-      
-      const matchesSeverity = !severity || severity === "all" || 
-        errorCode.severity.toLowerCase() === severity.toLowerCase();
-      
-      return matchesQuery && matchesSystem && matchesSeverity;
-    });
+    return results;
   }
 }
 
-export const storage = new MemStorage();
+// For database seeding
+export async function seedDatabase() {
+  // Check if we already have data
+  const count = await db.select({ count: sql`COUNT(*)` }).from(errorCodes);
+  
+  if (Number(count[0].count) === 0) {
+    console.log("Seeding database with initial error codes...");
+    await db.insert(errorCodes).values(initialErrorCodes);
+  }
+}
+
+export const storage = new DatabaseStorage();
